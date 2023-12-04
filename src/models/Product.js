@@ -10,5 +10,4 @@ const ProdcutSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 module.exports = mongoose.model("Product", ProdcutSchema);

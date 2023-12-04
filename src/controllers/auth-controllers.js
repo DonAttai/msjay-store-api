@@ -52,7 +52,7 @@ const login = async (req, res, next) => {
     // check if user exists
     const user = await User.findOne({ username: userData.username });
     if (!user) {
-      return next(createError.NotFound("User Does Not Exists"));
+      return next(createError.NotFound("Invalid Credentials"));
     }
 
     // compare password
@@ -65,7 +65,7 @@ const login = async (req, res, next) => {
       return next(createError.Unauthorized("Invalid Credentials"));
     }
 
-    // generate token
+    // generate access token
     const accessToken = jwt.sign(
       { id: user.id, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,

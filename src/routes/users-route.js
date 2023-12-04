@@ -1,18 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { verifyTokenAndAuthorize } = require("../middleware/authMiddleware");
+const { updateUser, getAllUsers } = require("../controllers/users-controller");
+const {
+  verifyAccessToken,
+  verifyAccessTokenAndAuthorization,
+  verifyAccessTokenAndAdmin,
+} = require("../middleware/authMiddleware");
 
-router.patch("/:id", verifyTokenAndAuthorize, (req, res, next) => {
-  try {
-    console.log(req.user);
-    res.send("update route");
-  } catch (error) {
-    next(error);
-  }
-});
+router.patch("/:id", verifyAccessTokenAndAuthorization, updateUser);
 
-router.get("/", (req, res, next) => {
-  res.send("welcome!");
-});
+router.get("/", verifyAccessToken, getAllUsers);
 
 module.exports = router;
