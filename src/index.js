@@ -8,8 +8,10 @@ const app = express();
 
 // import router
 const authRouter = require("./routes/auth-route");
-const usersRouter = require("./routes/users-route");
-const productsRouter = require("./routes/product-route");
+const userRouter = require("./routes/users-route");
+const productRouter = require("./routes/product-route");
+const cartRouter = require("./routes/cart-route");
+const orderRouter = require("./routes/order-route");
 
 const PORT = process.env.PROT ?? 3003;
 
@@ -17,12 +19,15 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
+  console.log(req.user);
   res.send("Welcome to Ms Jay Store!");
 });
 // route middleware
 app.use("/api/auth", authRouter);
-app.use("/api/users", usersRouter);
-app.use("/api/products", productsRouter);
+app.use("/api/users", userRouter);
+app.use("/api/products", productRouter);
+app.use("/api/carts", cartRouter);
+app.use("/api/orders", orderRouter);
 
 app.use((req, res, next) => {
   next(createError.NotFound("Page Not Found"));
