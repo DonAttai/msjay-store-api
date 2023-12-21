@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
-let URI;
+let DB_URI;
 if (process.env.NODE_ENV === "development") {
-  URI = process.env.MONGO_URI;
+  DB_URI = process.env.MONGO_URI;
 } else {
-  URI = process.env.MONGO_ATLAS_URI;
+  DB_URI = process.env.MONGO_ATLAS_URI;
 }
 const dbConnection = async () => {
-  return await mongoose.connect(URI, {});
+  return await mongoose.connect(DB_URI, {});
 };
 
 module.exports = dbConnection;
