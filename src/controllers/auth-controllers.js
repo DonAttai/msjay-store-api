@@ -13,6 +13,13 @@ const {
   sendAccountVerificationEmail,
 } = require("../helpers/email");
 
+let URL;
+if (process.env.NODE_ENV === "developmet") {
+  URL = process.env.LOCAL_URL;
+} else {
+  URL = process.env.URL;
+}
+
 // Register
 const register = async (req, res, next) => {
   try {
@@ -48,7 +55,7 @@ const register = async (req, res, next) => {
     const token = jwt.sign({ email: user.email }, secret, { expiresIn: "24h" });
 
     // generatae link
-    const link = `https://msjay-store.onrender.com/verify-email/${user.id}/${token}`;
+    const link = `${URL}/verify-email/${user.id}/${token}`;
 
     await sendAccountVerificationEmail({
       email: user.email,
@@ -116,7 +123,7 @@ const forgotPassword = async (req, res, next) => {
     const token = jwt.sign({ id: user.id }, secret, { expiresIn: "15m" });
 
     // generate link
-    const link = `https://msjay-store.onrender.com/reset-password/${user.id}/${token}`;
+    const link = `${URL}/reset-password/${user.id}/${token}`;
 
     // send email
     await sendForgetPasswordEmail({

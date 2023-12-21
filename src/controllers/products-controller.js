@@ -12,7 +12,7 @@ const getAllProducts = async (req, res, next) => {
     page = 1;
   }
   if (!size) {
-    size = 20;
+    size = 8;
   }
   const skip = (page - 1) * size;
   const limit = +size;
