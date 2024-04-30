@@ -1,7 +1,7 @@
 const { MailerSend, EmailParams, Sender, Recipient } = require("mailersend");
 
 const mailerSend = new MailerSend({
-  apiKey: process.env.API_KEY,
+  apiKey: process.env.EMAIL_API_KEY,
 });
 const sentFrom = new Sender(
   "msjaystore@trial-neqvygm968wl0p7w.mlsender.net",
@@ -18,7 +18,7 @@ const sendVerificationEmail = async (user, token) => {
     .setSubject("Email Verification")
     .setHtml(
       `<p>Hello ${user.username.toUpperCase()}, click the link below to verify your email:
-  ${process.env.CLIENT_URL_LOCAL}/verify-email/${user._id}/${token}
+  ${process.env.CLIENT_URL_REMOTE}/verify-email/${user._id}/${token}
   </P>
   `
     );
@@ -40,7 +40,7 @@ const sendForgetPasswordEmail = async (user, token) => {
     .setSubject("Reset Password")
     .setHtml(
       `<p>Hello ${user.username.toUpperCase()}, click the link below to reset your password:
-  ${process.env.CLIENT_URL_LOCAL}/reset-password/${user._id}/${token}
+  ${process.env.CLIENT_URL_REMOTE}/reset-password/${user._id}/${token}
   </P>
   `
     );
