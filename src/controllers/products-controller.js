@@ -12,7 +12,7 @@ const getAllProducts = async (req, res, next) => {
     page = 1;
   }
   if (!size) {
-    size = 20;
+    size = 10;
   }
   const skip = (page - 1) * size;
   const limit = +size;
@@ -39,42 +39,37 @@ const getAllProducts = async (req, res, next) => {
 
 // create a produuct
 const createProduct = async (req, res, next) => {
-  if (req.user?.roles.includes("admin")) {
-    try {
-      const productData = await createProductSchema.validateAsync(req.body);
+  try {
+    const productData = await createProductSchema.validateAsync(req.body);
 
-      // check if product exists
-      const product = await Product.findOne({ title: productData.title });
-      if (product) {
-        return next(createError.Conflict());
-      }
-      // create product
-      const newProduct = await Product.create(productData);
-      res.status(201).json(newProduct);
-    } catch (error) {
-      if (error.isJoi === true) {
-        error.status = 422;
-      }
-      next(error);
+    // check if product exists
+    const product = await Product.findOne({ title: productData.title });
+    if (product) {
+      return next(createError.Conflict());
     }
-  } else {
-    next(createError.Unauthorized());
+    // create product
+    const newProduct = await Product.create({
+      ...productData,
+      image: req.file.path,
+    });
+    res.status(201).json(newProduct);
+  } catch (error) {
+    if (error.isJoi === true) {
+      error.status = 422;
+    }
+    next(error);
   }
 };
 
 // delete product by id
 const deleteProduct = async (req, res, next) => {
-  if (req.user?.roles.includes("admin")) {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return next(createError.NotFound());
-    }
-
-    await product.deleteOne({ _id: product._id });
-    res.status(204).json({});
-  } else {
-    next(createError.Unauthorized());
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(createError.NotFound());
   }
+
+  await product.deleteOne({ _id: product._id });
+  res.status(204).json({});
 };
 
 const getProductById = async (req, res, next) => {
@@ -90,25 +85,21 @@ const getProductById = async (req, res, next) => {
 };
 
 const updateProduct = async (req, res, next) => {
-  if (req.user.roles.includes("admin")) {
-    try {
-      const productData = await updateProductSchema.validateAsync(req.body);
-      const product = await Product.findById(req.params.id.toString());
-      if (!product) {
-        return next(createError.NotFound());
-      }
-      const updatedProduct = await Product.findByIdAndUpdate(
-        req.params.id,
-        productData,
-        { new: true }
-      );
-
-      res.status(200).json(updatedProduct);
-    } catch (error) {
-      next(error);
+  try {
+    const productData = await updateProductSchema.validateAsync(req.body);
+    const product = await Product.findById(req.params.id.toString());
+    if (!product) {
+      return next(createError.NotFound());
     }
-  } else {
-    next(createError.Unauthorized());
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      productData,
+      { new: true }
+    );
+
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    next(error);
   }
 };
 module.exports = {

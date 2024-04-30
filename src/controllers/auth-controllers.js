@@ -1,7 +1,7 @@
 const createError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
+const { User } = require("../models/User");
 const {
   registerSchema,
   loginSchema,
@@ -9,9 +9,9 @@ const {
   resetPasswordSchema,
 } = require("../helpers/validation-schema");
 const {
+  sendVerificationEmail,
   sendForgetPasswordEmail,
-  sendAccountVerificationEmail,
-} = require("../helpers/email");
+} = require("../utils/send-email");
 
 let URL;
 if (process.env.NODE_ENV === "developmet") {
@@ -44,28 +44,26 @@ const register = async (req, res, next) => {
 
     // hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(userData.password, salt);
-    userData.password = hashedPassword;
+    userData.password = await bcrypt.hash(userData.password, salt);
 
     // create user
-    const user = await User.create(userData);
+    const user = new User(userData);
 
-    // generate token
+    // generate token to verify email
     const secret = process.env.JWT_SECRET + user.isVerified;
     const token = jwt.sign({ email: user.email }, secret, { expiresIn: "24h" });
 
-    // generatae link
-    const link = `${URL}/verify-email/${user.id}/${token}`;
-
-    await sendAccountVerificationEmail({
-      email: user.email,
-      link,
-      name: user.username,
-    });
-
-    res.status(201).json({
-      message: "A link has been sent to your email for verification",
-    });
+    // send verification email
+    sendVerificationEmail(user, token)
+      .then(() => {
+        user.save();
+        res.status(201).json({
+          message: "A link has been sent to your email for verification",
+        });
+      })
+      .catch((error) => {
+        throw error;
+      });
   } catch (error) {
     if (error.isJoi == true) {
       error.status = 422;
@@ -118,23 +116,20 @@ const forgotPassword = async (req, res, next) => {
 
     if (!user) return next(createError.NotFound());
 
-    // generate token
+    // generate token to reset  password
     const secret = process.env.JWT_SECRET + user.password;
     const token = jwt.sign({ id: user.id }, secret, { expiresIn: "15m" });
 
-    // generate link
-    const link = `${URL}/reset-password/${user.id}/${token}`;
-
     // send email
-    await sendForgetPasswordEmail({
-      email,
-      link,
-      name: user.username,
-    });
-
-    res
-      .status(200)
-      .json({ message: "Reset password link has been sent to your email" });
+    sendForgetPasswordEmail(user, token)
+      .then(() => {
+        res
+          .status(200)
+          .json({ message: "Reset password link has been sent to your email" });
+      })
+      .catch((error) => {
+        throw error;
+      });
   } catch (error) {
     next(error);
   }
@@ -167,6 +162,8 @@ const resetPassword = async (req, res, next) => {
 // verify email
 const verifyEmail = async (req, res, next) => {
   const { id, token } = req.params;
+  const body = req.body;
+  console.log(body);
 
   try {
     const user = await User.findById(id);
@@ -186,7 +183,7 @@ const verifyEmail = async (req, res, next) => {
       email: user.email,
       username: user.username,
       isVerified: user.isVerified,
-      roles: user.roles,
+      role: user.role,
       accessToken: generateAccessToken(user),
     });
   } catch (error) {
@@ -196,7 +193,7 @@ const verifyEmail = async (req, res, next) => {
 
 // generate access token
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user.id, roles: user.roles }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: "24h",
   });
 };

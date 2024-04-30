@@ -45,79 +45,45 @@ const updateProductSchema = Joi.object({
 
 // create cart schema
 const createCartSchema = Joi.object({
-  userId: Joi.string()
+  productId: Joi.string()
     .meta({
-      _mongoose: { type: "objectId", ref: "User" },
+      _mongoose: { type: "objectId", ref: "Product" },
     })
     .required(),
-  products: Joi.array().items(
-    Joi.object({
-      productId: Joi.string()
-        .meta({
-          _mongoose: { type: "objectId", ref: "Product" },
-        })
-        .required(),
-      quantity: Joi.number().required(),
-    }).required()
-  ),
+  quantity: Joi.number(),
 });
 
 // update cart schema
 const updateCartSchema = Joi.object({
-  userId: Joi.string()
+  productId: Joi.string()
     .meta({
-      _mongoose: { type: "objectId", ref: "User" },
+      _mongoose: { type: "objectId", ref: "Product" },
     })
     .required(),
-  products: Joi.array().items(
-    Joi.object({
-      productId: Joi.string()
-        .meta({
-          _mongoose: { type: "objectId", ref: "Product" },
-        })
-        .required(),
-      quantity: Joi.number().required(),
-    }).required()
-  ),
+  quantity: Joi.number().required(),
 });
 
 // create order schema
 const createOrderSchema = Joi.object({
-  userId: Joi.string()
+  productId: Joi.string()
     .meta({
-      _mongoose: { type: "objectId", ref: "User" },
+      _mongoose: { type: "objectId", ref: "Product" },
     })
     .required(),
-  products: Joi.array().items(
-    Joi.object({
-      productId: Joi.string()
-        .meta({
-          _mongoose: { type: "objectId", ref: "Product" },
-        })
-        .required(),
-      quantity: Joi.number().required(),
-    }).required()
-  ),
+  quantity: Joi.number().required(),
+
   amount: Joi.number().required(),
 });
 
 // update order schema
 const updateOrderSchema = Joi.object({
-  userId: Joi.string()
+  productId: Joi.string()
     .meta({
-      _mongoose: { type: "objectId", ref: "User" },
+      _mongoose: { type: "objectId", ref: "Product" },
     })
     .required(),
-  products: Joi.array().items(
-    Joi.object({
-      productId: Joi.string()
-        .meta({
-          _mongoose: { type: "objectId", ref: "Product" },
-        })
-        .required(),
-      quantity: Joi.number().required(),
-    }).required()
-  ),
+  quantity: Joi.number().required(),
+
   amount: Joi.number().required(),
 });
 

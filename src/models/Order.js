@@ -1,16 +1,27 @@
 const mongoose = require("mongoose");
 
+const STATUS = {
+  PENDING: "pending",
+  PROCESSING: "processing",
+  SENT: "sent",
+  DELIVERED: "delivered",
+};
+
 const OrderSchema = new mongoose.Schema(
   {
-    userId: { type: Schema.Types.ObjectId, ref: User, required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     products: [
       {
-        productId: Schema.Types.ObjectId,
+        productId: mongoose.Schema.Types.ObjectId,
         quantity: { type: Number, required: true },
       },
     ],
     amount: { type: Number, required: true },
-    status: { type: String, default: "pending" },
+    status: { type: String, enum: STATUS, default: STATUS.PENDING },
   },
   { timestamps: true }
 );
