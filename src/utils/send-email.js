@@ -1,5 +1,12 @@
 const { MailerSend, EmailParams, Sender, Recipient } = require("mailersend");
 
+let HOSTNAME;
+if (process.env.NODE_ENV === "development") {
+  HOSTNAME = process.env.CLIENT_URL_LOCAL;
+} else {
+  HOSTNAME = process.env.CLIENT_URL_REMOTE;
+}
+
 const mailerSend = new MailerSend({
   apiKey: process.env.EMAIL_API_KEY,
 });
@@ -18,7 +25,7 @@ const sendVerificationEmail = async (user, token) => {
     .setSubject("Email Verification")
     .setHtml(
       `<p>Hello ${user.username.toUpperCase()}, click the link below to verify your email:
-  ${process.env.CLIENT_URL_REMOTE}/verify-email/${user._id}/${token}
+  ${HOSTNAME}/verify-email/${user._id}/${token}
   </P>
   `
     );
@@ -40,7 +47,7 @@ const sendForgetPasswordEmail = async (user, token) => {
     .setSubject("Reset Password")
     .setHtml(
       `<p>Hello ${user.username.toUpperCase()}, click the link below to reset your password:
-  ${process.env.CLIENT_URL_REMOTE}/reset-password/${user._id}/${token}
+  ${HOSTNAME}/reset-password/${user._id}/${token}
   </P>
   `
     );
