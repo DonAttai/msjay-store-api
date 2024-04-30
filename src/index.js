@@ -20,7 +20,11 @@ const PORT = process.env.PROT ?? 3003;
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
-    if (["http://localhost:3200"].indexOf(origin !== -1)) {
+    if (
+      ["http://localhost:3200", "https://msjay-store.onrender.com"].indexOf(
+        origin !== -1
+      )
+    ) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
