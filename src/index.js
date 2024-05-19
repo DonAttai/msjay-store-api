@@ -1,12 +1,10 @@
 const express = require("express");
-require("dotenv").config();
 const bodyParser = require("body-parser");
 const createError = require("http-errors");
 const dbConnection = require("./config/db");
 const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
-const axios = require("axios");
 
 // import router
 const authRouter = require("./routes/auth-route");

@@ -29,9 +29,10 @@ const paystackWebHook = (req, res, next) => {
     .digest("hex");
   if (hash == req.headers["x-paystack-signature"]) {
     // Retrieve the request's body
-    const event = req.body;
-    if (event.event === "charge.success") {
-      console.log(event);
+    const { event, data } = req.body;
+    if (event === "charge.success") {
+      console.log("event", event);
+      console.log("amount", data.amount);
     }
     // Do something with event
   }
