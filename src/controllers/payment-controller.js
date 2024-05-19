@@ -32,7 +32,7 @@ const paystackWebHook = (req, res, next) => {
     const { event, data } = req.body;
     if (event === "charge.success") {
       console.log("event", event);
-      console.log("amount", data.amount);
+      console.log("data", data);
     }
     // Do something with event
   }
