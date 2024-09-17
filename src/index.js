@@ -20,16 +20,21 @@ const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
 const PORT = process.env.PROT ?? 3003;
 
-const whiteList = ["http://localhost:3200", "https://msjay-store.onrender.com"];
+const allowedOrigins = [
+  "http://localhost:3200",
+  "https://msjay-store.onrender.com",
+];
 const corsOptions = {
-  credentials: true,
   origin: (origin, callback) => {
-    if (whiteList.indexOf(origin !== -1)) {
+    if (allowedOrigins.indexOf(origin !== -1)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
@@ -62,6 +67,26 @@ app.use(
     },
   })
 );
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin;
+
+//   // Check if the request origin is in the list of allowed origins
+//   if (allowedOrigins.includes(origin)) {
+//     res.header("Access-Control-Allow-Origin", origin);
+//   }
+//   res.header(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+//   );
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+//   // If it's a preflight request, respond with 200
+//   if (req.method === "OPTIONS") {
+//     return res.status(200).end();
+//   }
+
+//   next();
+// });
 
 // home route
 app.get("/", (req, res) => {
