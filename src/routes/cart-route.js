@@ -34,7 +34,7 @@ router.post("/cart", checkUser, removeItemFromCart);
 router.post("/cart/:productId", checkUser, decreaseCartItemQuantity);
 
 // update cart  -> Authenticated user
-router.put("/:id", isAuthenticated, updateCart);
+router.patch("/:id", isAuthenticated, updateCart);
 
 // delete cart -> Authenticated user
 router.delete("/:id", isAuthenticated, deleteCart);
