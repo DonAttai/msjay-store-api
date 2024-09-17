@@ -49,6 +49,7 @@ const store = new MongoDBStore(
     if (error) console.error("Session store error:", error);
   }
 );
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,

@@ -3,8 +3,6 @@ const createError = require("http-errors");
 const { ROLE } = require("../models/User");
 
 const isAuthenticated = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  // const token = authHeader && authHeader.split(" ")[1];
   const token = req.cookies && req.cookies.accessToken;
 
   if (token) {
