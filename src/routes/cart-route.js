@@ -14,27 +14,29 @@ const {
   verifyToken,
   checkRole,
   isAuthenticated,
+  checkUser,
 } = require("../middleware/auth-middleware");
 const { ROLE } = require("../models/User");
 
-// create cart route
-router.post("/", verifyToken, addToCart);
+// add to cart -> Guest and Authenticated user
+router.post("/", checkUser, addToCart);
 
-// get all carts route
-router.get("/", verifyToken, checkRole([ROLE.ADMIN]), getAllCarts);
+// get all carts route -> Admin
+router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllCarts);
 
-// get user cart route
-router.get("/cart", isAuthenticated, getCart);
-// remove item from cart route
-router.post("/cart", isAuthenticated, removeItemFromCart);
+// get  cart  -> Guest and Authenticated user
+router.get("/cart", checkUser, getCart);
 
-// decrease cart item quantity route
-router.post("/cart/:productId", isAuthenticated, decreaseCartItemQuantity);
+// remove item from cart -> Guest and Authenticated user
+router.post("/cart", checkUser, removeItemFromCart);
 
-// update cart route
-router.get("/:id", updateCart);
+// decrease cart item quantity  -> Guest and Authenticated user
+router.post("/cart/:productId", checkUser, decreaseCartItemQuantity);
 
-// delete cart route
-router.get("/:id", deleteCart);
+// update cart  -> Authenticated user
+router.put("/:id", isAuthenticated, updateCart);
+
+// delete cart -> Authenticated user
+router.delete("/:id", isAuthenticated, deleteCart);
 
 module.exports = router;

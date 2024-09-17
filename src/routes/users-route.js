@@ -10,23 +10,24 @@ const {
 const {
   verifyToken,
   checkRole,
-  currentUserOrAdmin,
+  getCurrentUserOrAdmin,
+  isAuthenticated,
 } = require("../middleware/auth-middleware");
 const { ROLE } = require("../models/User");
 
 // get all users
-router.get("/", verifyToken, checkRole([ROLE.ADMIN]), getAllUsers);
+router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllUsers);
 
 // get users statistics
-router.get("/stats", verifyToken, checkRole([ROLE.ADMIN]), getUsersStats);
+router.get("/stats", isAuthenticated, checkRole([ROLE.ADMIN]), getUsersStats);
 
 // get a single user
-router.get("/:id", verifyToken, currentUserOrAdmin(), getUserById);
+router.get("/:id", isAuthenticated, getCurrentUserOrAdmin(), getUserById);
 
 // update user
-router.patch("/:id", verifyToken, updateUser);
+router.patch("/:id", isAuthenticated, updateUser);
 
 // delete user
-router.delete("/:id", verifyToken, deleteUser);
+router.delete("/:id", isAuthenticated, deleteUser);
 
 module.exports = router;

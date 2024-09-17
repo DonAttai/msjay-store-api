@@ -1,15 +1,17 @@
+const { number } = require("joi");
 const Joi = require("joi");
 
 // register schema
 const registerSchema = Joi.object({
-  username: Joi.string().min(3).required(),
   email: Joi.string().email({ minDomainSegments: 2 }).lowercase().required(),
   password: Joi.string().min(8).required(),
+  firstName: Joi.string().required(),
+  lastName: Joi.string().required(),
 });
 
 // login schema
 const loginSchema = Joi.object({
-  username: Joi.string().min(3).required(),
+  email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
 
@@ -31,7 +33,8 @@ const createProductSchema = Joi.object({
   price: Joi.number().required(),
   category: Joi.string().required(),
   description: Joi.string().required(),
-  image: Joi.string().required(),
+  stock: Joi.number(),
+  image: Joi.string(),
 });
 
 // update product schema
@@ -40,51 +43,31 @@ const updateProductSchema = Joi.object({
   price: Joi.number(),
   category: Joi.string(),
   description: Joi.string(),
-  image: Joi.string(),
+  stock: Joi.number(),
 });
 
 // create cart schema
 const createCartSchema = Joi.object({
-  productId: Joi.string()
-    .meta({
-      _mongoose: { type: "objectId", ref: "Product" },
-    })
-    .required(),
+  productId: Joi.string().required(),
   quantity: Joi.number(),
 });
 
 // update cart schema
 const updateCartSchema = Joi.object({
-  productId: Joi.string()
-    .meta({
-      _mongoose: { type: "objectId", ref: "Product" },
-    })
-    .required(),
+  productId: Joi.string().required(),
   quantity: Joi.number().required(),
 });
 
 // create order schema
 const createOrderSchema = Joi.object({
-  productId: Joi.string()
-    .meta({
-      _mongoose: { type: "objectId", ref: "Product" },
-    })
-    .required(),
-  quantity: Joi.number().required(),
-
+  email: Joi.string().required(),
   amount: Joi.number().required(),
+  cartItems: Joi.array().items(createCartSchema),
 });
 
 // update order schema
 const updateOrderSchema = Joi.object({
-  productId: Joi.string()
-    .meta({
-      _mongoose: { type: "objectId", ref: "Product" },
-    })
-    .required(),
-  quantity: Joi.number().required(),
-
-  amount: Joi.number().required(),
+  orderStatus: Joi.string().required(),
 });
 
 const resetPasswordSchema = Joi.object({
@@ -92,6 +75,15 @@ const resetPasswordSchema = Joi.object({
 });
 const forgetPasswordSchema = Joi.object({
   email: Joi.string().min(8).required(),
+});
+
+// create address schema
+const addressSchema = Joi.object({
+  address: Joi.string().required(),
+  street: Joi.string().required(),
+  city: Joi.string().required(),
+  state: Joi.string().required(),
+  phone: Joi.string().required(),
 });
 
 module.exports = {
@@ -107,4 +99,5 @@ module.exports = {
   updateOrderSchema,
   resetPasswordSchema,
   forgetPasswordSchema,
+  addressSchema,
 };

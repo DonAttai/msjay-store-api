@@ -5,24 +5,8 @@ const { passwordSchema } = require("../helpers/validation-schema");
 
 //Get all users
 const getAllUsers = async (req, res, next) => {
-  let { page, size } = req.query;
-
-  if (!page) {
-    page = 1;
-  }
-  if (!size) {
-    size = 10;
-  }
-  const limit = +size;
-
-  const skip = (page - 1) * size;
-  const order = req.query.order === "desc" ? -1 : 1;
   try {
-    const users = await User.find()
-      .select("-password")
-      .sort({ createdAt: order })
-      .limit(limit)
-      .skip(skip);
+    const users = await User.find({});
     res.status(200).json(users);
   } catch (error) {
     next(error);

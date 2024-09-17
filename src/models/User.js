@@ -5,15 +5,11 @@ const ROLE = {
 };
 const UserSchema = new mongoose.Schema(
   {
+    firstName: { type: String, default: "" },
+    lastName: { type: String, default: "" },
     username: { type: String, required: true, unique: true, lowercase: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    address: {
-      city: String,
-      street: String,
-      number: Number,
-    },
-    Phone: { type: String },
     role: { type: String, enum: [ROLE.ADMIN, ROLE.USER], default: ROLE.USER },
     isVerified: { type: Boolean, default: false },
   },

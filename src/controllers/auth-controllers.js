@@ -2,9 +2,9 @@ const createError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { User } = require("../models/User");
+const Cart = require("../models/Cart");
 const {
   registerSchema,
-  loginSchema,
   forgetPasswordSchema,
   resetPasswordSchema,
 } = require("../helpers/validation-schema");
@@ -24,14 +24,6 @@ if (process.env.NODE_ENV === "developmet") {
 const register = async (req, res, next) => {
   try {
     const userData = await registerSchema.validateAsync(req.body);
-
-    // check by username if user exists
-    const usernameExist = await User.findOne({ username: userData.username });
-    if (usernameExist) {
-      return next(
-        createError.Conflict(`${userData.username} has already been taken`)
-      );
-    }
 
     // check by email if user exists
     const emailExist = await User.findOne({ email: userData.email });
@@ -75,28 +67,55 @@ const register = async (req, res, next) => {
 //   Login
 const login = async (req, res, next) => {
   try {
-    const userData = await loginSchema.validateAsync(req.body);
+    // Check if there's a guest cart and merge it with the user's cart
+    const guestCart = req.session.guestCart;
+    const userCart = await Cart.findOne({ userId: req.user._id });
 
-    // check if user exists
-    const user = await User.findOne({ username: userData.username });
-    if (!user) return next(createError.NotFound("Invalid Credentials"));
+    if (guestCart && guestCart.products.length > 0) {
+      if (userCart) {
+        // Sync guest cart with the user's cart
+        guestCart.products.forEach((guestProduct) => {
+          const existingProduct = userCart.products.find(
+            (p) => p.productId.toString() === guestProduct.productId.toString()
+          );
+          if (existingProduct) {
+            // Update quantity if product exists
+            existingProduct.quantity += guestProduct.quantity;
+          } else {
+            // Add new product to user's cart
+            userCart.products.push(guestProduct);
+          }
+        });
+        await userCart.save();
+      } else {
+        // If user has no cart, create a new one
+        await Cart.create({
+          userId: req.user._id,
+          products: guestCart.products,
+        });
+      }
+      // Clear guest cart session
+      req.session.guestCart = null;
+    }
 
-    // compare password
-    const isValidPassword = await bcrypt.compare(
-      userData.password,
-      user.password
-    );
+    const user = req.user;
+    const accessToken = generateAccessToken(user);
 
-    if (!isValidPassword)
-      return next(createError.Unauthorized("Invalid Credentials"));
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
     res.status(200).json({
       _id: user.id,
       email: user.email,
       username: user.username,
       isVerified: user.isVerified,
-      roles: user.roles,
-      accessToken: generateAccessToken(user),
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
     });
   } catch (error) {
     if (error.isJoi === true) {

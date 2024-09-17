@@ -2,45 +2,41 @@ const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const { ROLE } = require("../models/User");
 
-// verify access token
-const verifyToken = async (req, res, next) => {
+const isAuthenticated = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  let token = authHeader && authHeader.split(" ")[1];
+  // const token = authHeader && authHeader.split(" ")[1];
+  const token = req.cookies && req.cookies.accessToken;
 
-  if (!token) {
-    req.user = null;
-    return next();
+  if (token) {
+    const { JWT_SECRET: secret } = process.env;
+    jwt.verify(token, secret, (err, payload) => {
+      if (err) {
+        return next(createError.Unauthorized("Invalid Access Token"));
+      }
+      req.user = payload;
+      next();
+    });
+  } else {
+    next(createError.Unauthorized("No Access Token"));
   }
-  jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-    if (err) return next(createError.Unauthorized("Invalid token"));
-    req.user = payload;
-    next();
-  });
 };
 
-const isAuthenticated = (req, res, next) => {
-  const authHeader =
-    req.headers.authorization && req.headers.authorization.startsWith("Bearer");
+// check user
+const checkUser = (req, res, next) => {
+  const token = req.cookies && req.cookies.accessToken;
 
-  if (authHeader) {
-    const token = req.headers.authorization.split(" ")[1];
-    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+  if (token) {
+    const { JWT_SECRET: secret } = process.env;
+    jwt.verify(token, secret, (err, payload) => {
       if (err) {
-        if (err) return next(createError.Unauthorized("Invalid token"));
+        return next(createError.Unauthorized("Invalid Access Token"));
       }
       req.user = payload;
     });
   } else {
-    if (req.signedCookies.device) {
-      req.user = { id: req.signedCookies.device, role: "guest user" };
-    }
+    req.user = null;
   }
-
-  if (req.user) {
-    next();
-  } else {
-    next(createError.Unauthorized());
-  }
+  next();
 };
 
 const checkRole = (roles) => {
@@ -49,19 +45,19 @@ const checkRole = (roles) => {
     if (roles.includes(role)) {
       next();
     } else {
-      res.status(401).json({ message: "You are not authorised" });
+      next(createError.Unauthorized("You are not authorised"));
     }
   };
 };
 
-const currentUserOrAdmin = () => {
+const getCurrentUserOrAdmin = () => {
   return (req, res, next) => {
     const role = req.user?.role;
     const currentUser = req.user.id === req.params.id;
     if (role === ROLE.ADMIN || currentUser) {
       next();
     } else {
-      res.status(401).json({ message: "You are not authorised" });
+      next(createError.Unauthorized("You are not authorised"));
     }
   };
 };
@@ -69,8 +65,8 @@ const currentUserOrAdmin = () => {
 //
 
 module.exports = {
-  verifyToken,
   checkRole,
-  currentUserOrAdmin,
+  getCurrentUserOrAdmin,
   isAuthenticated,
+  checkUser,
 };

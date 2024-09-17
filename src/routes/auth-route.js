@@ -7,12 +7,13 @@ const {
   resetPassword,
   verifyEmail,
 } = require("../controllers/auth-controllers");
+const validateUser = require("../middleware/validate-user-middleware");
 
 // Register
 router.post("/register", register);
 
 // Login
-router.post("/login", login);
+router.post("/login", validateUser, login);
 
 router.post("/forget-password", forgotPassword);
 router.post("/reset-password/:id/:token", resetPassword);
