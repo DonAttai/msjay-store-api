@@ -21,8 +21,8 @@ const addressRouter = require("./routes/address-route");
 const PORT = process.env.PROT ?? 3003;
 
 const allowedOrigins = [
-  "http://localhost:3200",
   "https://msjay-store.onrender.com",
+  "http://localhost:3200",
 ];
 const corsOptions = {
   origin: (origin, callback) => {
@@ -33,7 +33,7 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
@@ -59,7 +59,7 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store,
     cookie: {
       secure: process.env.NODE_ENV === "production",
@@ -67,26 +67,6 @@ app.use(
     },
   })
 );
-// app.use((req, res, next) => {
-//   const origin = req.headers.origin;
-
-//   // Check if the request origin is in the list of allowed origins
-//   if (allowedOrigins.includes(origin)) {
-//     res.header("Access-Control-Allow-Origin", origin);
-//   }
-//   res.header(
-//     "Access-Control-Allow-Methods",
-//     "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-//   );
-//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-//   // If it's a preflight request, respond with 200
-//   if (req.method === "OPTIONS") {
-//     return res.status(200).end();
-//   }
-
-//   next();
-// });
 
 // home route
 app.get("/", (req, res) => {
