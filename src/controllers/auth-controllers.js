@@ -13,13 +13,6 @@ const {
   sendForgetPasswordEmail,
 } = require("../utils/send-email");
 
-let URL;
-if (process.env.NODE_ENV === "developmet") {
-  URL = process.env.LOCAL_URL;
-} else {
-  URL = process.env.URL;
-}
-
 // Register
 const register = async (req, res, next) => {
   try {
@@ -42,20 +35,12 @@ const register = async (req, res, next) => {
     const user = new User(userData);
 
     // generate token to verify email
-    const secret = process.env.JWT_SECRET + user.isVerified;
-    const token = jwt.sign({ email: user.email }, secret, { expiresIn: "24h" });
+    // const secret = process.env.JWT_SECRET + user.isVerified;
+    // const token = jwt.sign({ email: user.email }, secret, { expiresIn: "24h" });
 
     // send verification email
-    sendVerificationEmail(user, token)
-      .then(() => {
-        user.save();
-        res.status(201).json({
-          message: "A link has been sent to your email for verification",
-        });
-      })
-      .catch((error) => {
-        throw error;
-      });
+    await user.save();
+    res.status(201).json({ message: "Account created successfully" });
   } catch (error) {
     if (error.isJoi == true) {
       error.status = 422;

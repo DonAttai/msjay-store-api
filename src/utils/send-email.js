@@ -1,11 +1,12 @@
 const { MailerSend, EmailParams, Sender, Recipient } = require("mailersend");
 
-let HOSTNAME;
-if (process.env.NODE_ENV === "development") {
-  HOSTNAME = process.env.CLIENT_URL_LOCAL;
-} else {
-  HOSTNAME = process.env.CLIENT_URL_REMOTE;
+function getHostName() {
+  if (process.env.NODE_ENV === "development") {
+    return process.env.CLIENT_URL_LOCAL;
+  }
+  return process.env.CLIENT_URL_REMOTE;
 }
+const HOSTNAME = getHostName();
 
 const mailerSend = new MailerSend({
   apiKey: process.env.EMAIL_API_KEY,
