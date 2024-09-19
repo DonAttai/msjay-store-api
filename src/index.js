@@ -20,6 +20,8 @@ const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
 const PORT = process.env.PROT ?? 3003;
 
+console.log(process.env.NODE_ENV);
+
 const allowedOrigins = [
   "https://msjay-store.onrender.com",
   "http://localhost:3200",
