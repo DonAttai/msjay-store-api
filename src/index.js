@@ -20,30 +20,27 @@ const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
 const PORT = process.env.PROT ?? 3003;
 
-console.log(process.env.NODE_ENV);
-
 const allowedOrigins = [
   "https://msjay-store.onrender.com",
   "http://localhost:3200",
 ];
 const corsOptions = {
+  origin: allowedOrigins,
   credentials: true,
-  origin: (origin, callback) => {
-    if (allowedOrigins.indexOf(origin !== -1)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  // origin: (origin, callback) => {
+  //   if (allowedOrigins.indexOf(origin !== -1)) {
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error("Not allowed by CORS"));
+  //   }
+  // },
 };
 
 app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
-app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(cookieParser());
 
 const store = new MongoDBStore({
   uri: getMongoUrl(),
@@ -62,7 +59,6 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      signed: true,
       sameSite: "strict",
     },
   })
