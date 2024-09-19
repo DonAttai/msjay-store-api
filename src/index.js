@@ -55,6 +55,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    name: "device",
     store,
     cookie: {
       secure: process.env.NODE_ENV === "production",
