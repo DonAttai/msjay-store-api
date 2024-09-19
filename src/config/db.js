@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-function getDBURI() {
+function getMongoUrl() {
   if (process.env.NODE_ENV === "development") {
     return process.env.MONGO_URI;
   }
@@ -8,8 +8,7 @@ function getDBURI() {
 }
 
 const dbConnection = async () => {
-  const MONGO_URI = getDBURI();
-  return await mongoose.connect(MONGO_URI);
+  return await mongoose.connect(getMongoUrl());
 };
 
-module.exports = { dbConnection, getDBURI };
+module.exports = { dbConnection, getMongoUrl };

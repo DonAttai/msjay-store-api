@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const createError = require("http-errors");
 const { User, ROLE: Role } = require("../models/User");
 const { passwordSchema } = require("../helpers/validation-schema");
+const { default: mongoose } = require("mongoose");
 
 //Get all users
 const getAllUsers = async (req, res, next) => {
@@ -90,10 +91,45 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+// get user with address
+const getUserWithAddress = async (req, res, next) => {
+  const userId = req.params.userId;
+
+  try {
+    const userWithAddress = await fetchUserWithAddress(userId);
+    res.json(userWithAddress);
+  } catch (error) {
+    next(error);
+  }
+};
+
+//
+async function fetchUserWithAddress(userId) {
+  const userWithAddress = await User.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(userId) }, // Find the user by their userId
+    },
+    {
+      $lookup: {
+        from: "addresses", // Name of the address collection
+        localField: "_id", // Field from the user collection
+        foreignField: "userId", // Field from the address collection
+        as: "addresses", // The name for the array containing addresses
+      },
+    },
+    {
+      $unwind: "$addresses", // Optional: Use this if each user has only one address
+    },
+  ]);
+
+  return userWithAddress;
+}
+
 module.exports = {
   updateUser,
   getAllUsers,
   getUserById,
   getUsersStats,
   deleteUser,
+  getUserWithAddress,
 };

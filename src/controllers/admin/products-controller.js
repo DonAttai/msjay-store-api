@@ -49,29 +49,27 @@ const getAllProducts = async (req, res, next) => {
 const updateProduct = async (req, res, next) => {
   try {
     const productData = await updateProductSchema.validateAsync(req.body);
-    const product = await Product.findById(req.params.id.toString());
-    if (!product) {
-      return next(createError.NotFound());
-    }
-    const updatedProduct = await Product.findByIdAndUpdate(
+    const updateProduct = await Product.findByIdAndUpdate(
       req.params.id,
       productData,
       { new: true }
     );
+    if (!updateProduct) {
+      return next(createError.NotFound("Product Not Found!"));
+    }
 
-    res.status(200).json(updatedProduct);
+    res.status(200).json({ message: "Product update successful" });
   } catch (error) {
     next(error);
   }
 };
 // delete product by id
 const deleteProduct = async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) {
     return next(createError.NotFound());
   }
 
-  await product.deleteOne({ _id: product._id });
   res.status(204).json({});
 };
 

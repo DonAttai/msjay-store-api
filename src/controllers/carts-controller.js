@@ -7,11 +7,11 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
 const addOrUpdateCartItem = (cart, productId) => {
-  const productIndex = cart.products.findIndex(
+  const itemIndex = cart.products.findIndex(
     (product) => product.productId.toString() === productId
   );
-  if (productIndex !== -1) {
-    cart.products[productIndex].quantity += 1;
+  if (itemIndex !== -1) {
+    cart.products[itemIndex].quantity += 1;
   } else {
     cart.products.push({ productId, quantity: 1 });
   }
@@ -33,15 +33,24 @@ const addToCart = async (req, res, next) => {
       let userCart = await Cart.findOne({ userId: req.user.id });
 
       if (!userCart) {
-        userCart = new Cart({ userId: req.user.id, products: [] });
+        userCart = new Cart({
+          userId: req.user.id,
+          products: [{ productId, quantity: 1 }],
+        });
+        await userCart.save();
+        return res.status(200).json({ message: "Item added to cart!" });
       }
 
       addOrUpdateCartItem(userCart, productId);
       await userCart.save();
-      return res.status(200).json({ message: "Item added to cart!" });
+      res.status(200).json({ message: "Item added to cart!" });
     } else {
       if (!req.session.guestCart) {
-        req.session.guestCart = { userId: req.sessionID, products: [] };
+        req.session.guestCart = {
+          userId: req.sessionID,
+          products: [{ productId, quantity: 1 }],
+        };
+        return res.status(201).json({ message: "Item added to  cart" });
       }
 
       addOrUpdateCartItem(req.session.guestCart, productId);

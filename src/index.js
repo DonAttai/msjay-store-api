@@ -4,7 +4,7 @@ const createError = require("http-errors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
-const { dbConnection, getDBURI } = require("./config/db");
+const { dbConnection, getMongoUrl } = require("./config/db");
 const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
@@ -41,19 +41,15 @@ app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(cookieParser(process.env.SESSION_SECRET));
 
-const MONGO_URI = getDBURI();
-
-const store = new MongoDBStore(
-  {
-    uri: MONGO_URI,
-    collection: "sessions",
-  },
-  (error) => {
-    if (error) console.error("Session store error:", error);
-  }
-);
+const store = new MongoDBStore({
+  uri: getMongoUrl(),
+  collection: "sessions",
+});
+store.on("error", (error) => {
+  console.error(error);
+});
 
 app.use(
   session({
@@ -63,7 +59,8 @@ app.use(
     store,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      signed: true,
       sameSite: "strict",
     },
   })

@@ -6,6 +6,7 @@ const {
   getUserById,
   getUsersStats,
   deleteUser,
+  getUserWithAddress,
 } = require("../controllers/users-controller");
 const {
   verifyToken,
@@ -20,6 +21,12 @@ router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllUsers);
 
 // get users statistics
 router.get("/stats", isAuthenticated, checkRole([ROLE.ADMIN]), getUsersStats);
+router.get(
+  "/:userId/address",
+  isAuthenticated,
+  checkRole([ROLE.ADMIN]),
+  getUserWithAddress
+);
 
 // get a single user
 router.get("/:id", isAuthenticated, getCurrentUserOrAdmin(), getUserById);

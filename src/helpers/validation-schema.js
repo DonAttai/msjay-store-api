@@ -44,6 +44,7 @@ const updateProductSchema = Joi.object({
   category: Joi.string(),
   description: Joi.string(),
   stock: Joi.number(),
+  image: Joi.string(),
 });
 
 // create cart schema
