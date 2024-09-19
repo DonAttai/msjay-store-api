@@ -20,6 +20,8 @@ const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
 const PORT = process.env.PROT ?? 3003;
 
+console.log(process.env.NODE_ENV);
+
 const allowedOrigins = [
   "https://msjay-store.onrender.com",
   "http://localhost:3200",
@@ -27,13 +29,6 @@ const allowedOrigins = [
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
-  // origin: (origin, callback) => {
-  //   if (allowedOrigins.indexOf(origin !== -1)) {
-  //     callback(null, true);
-  //   } else {
-  //     callback(new Error("Not allowed by CORS"));
-  //   }
-  // },
 };
 
 app.use(cors(corsOptions));
@@ -60,7 +55,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: "strict",
+      sameSite: "none",
     },
   })
 );
