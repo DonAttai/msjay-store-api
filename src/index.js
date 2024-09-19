@@ -31,6 +31,7 @@ const corsOptions = {
   credentials: true,
 };
 
+app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
@@ -55,7 +56,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: "none",
+      sameSite: "strict",
     },
   })
 );
