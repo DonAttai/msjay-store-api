@@ -21,8 +21,6 @@ const isAuthenticated = (req, res, next) => {
 
 // check user
 const checkUser = (req, res, next) => {
-  console.log(req.cookies);
-  console.log(req.signedCookies);
   const token = req.cookies && req.cookies.accessToken;
   if (token) {
     const { JWT_SECRET: secret } = process.env;

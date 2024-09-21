@@ -31,7 +31,6 @@ const corsOptions = {
   credentials: true,
 };
 
-app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
