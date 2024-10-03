@@ -7,7 +7,6 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const { dbConnection, getMongoUrl } = require("./config/db");
 const cors = require("cors");
 const app = express();
-// const cookieParser = require("cookie-parser");
 
 // import router
 const authRouter = require("./routes/auth-route");
@@ -19,6 +18,7 @@ const orderRouter = require("./routes/order-route");
 const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
 const PORT = process.env.PORT ?? 5001;
+const secureSession = require("./utils/secure-session");
 
 const allowedOrigins = [
   "https://msjay-store.onrender.com",
@@ -33,7 +33,6 @@ app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
-// app.use(cookieParser());
 
 // create session store
 const store = new MongoDBStore({
@@ -53,7 +52,7 @@ app.use(
     name: "device",
     store,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: secureSession(),
       maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: "strict",
     },
