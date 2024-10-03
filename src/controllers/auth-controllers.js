@@ -84,23 +84,16 @@ const login = async (req, res, next) => {
     }
 
     const user = req.user;
-    const accessToken = generateAccessToken(user);
-
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
 
     res.status(200).json({
-      _id: user.id,
+      _id: user._id,
       email: user.email,
       username: user.username,
       isVerified: user.isVerified,
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
+      accessToken: generateAccessToken(user),
     });
   } catch (error) {
     if (error.isJoi === true) {

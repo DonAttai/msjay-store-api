@@ -10,6 +10,7 @@ const validateUser = async (req, res, next) => {
 
     const user = await User.findOne({ email });
     if (user && (await compare(password, user.password))) {
+      delete user.password;
       req.user = user;
       next();
     } else {

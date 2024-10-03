@@ -7,7 +7,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const { dbConnection, getMongoUrl } = require("./config/db");
 const cors = require("cors");
 const app = express();
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 
 // import router
 const authRouter = require("./routes/auth-route");
@@ -18,7 +18,7 @@ const cartRouter = require("./routes/cart-route");
 const orderRouter = require("./routes/order-route");
 const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
-const PORT = process.env.PROT ?? 3003;
+const PORT = process.env.PORT ?? 5001;
 
 const allowedOrigins = [
   "https://msjay-store.onrender.com",
@@ -33,12 +33,14 @@ app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
 app.use(bodyParser.json({ limit: "5mb" }));
-app.use(cookieParser());
+// app.use(cookieParser());
 
+// create session store
 const store = new MongoDBStore({
   uri: getMongoUrl(),
   collection: "sessions",
 });
+// listen for error
 store.on("error", (error) => {
   console.error(error);
 });
@@ -74,21 +76,23 @@ app.use("/api/paystack", paymentRouter);
 app.use("/api/address", addressRouter);
 
 // page not found handler
-app.use((req, res, next) => {
-  next(createError.NotFound("Page Not Found"));
+app.use((_req, _res, next) => {
+  next(createError.NotFound("Page Not Found!"));
 });
 
 // error handler
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   res.status(err.status ?? 500).json({
     status: err.status,
+    success: false,
     message: err.message,
   });
 });
+
 // connect to db
 dbConnection()
   .then(() => {
     console.log("connected to db...");
     app.listen(PORT, () => console.log(`server running on port: ${PORT}`));
   })
-  .catch((err) => console.log(err.message));
+  .catch((err) => console.error(err.message));

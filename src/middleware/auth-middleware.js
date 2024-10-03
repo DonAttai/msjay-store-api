@@ -2,9 +2,8 @@ const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const { ROLE } = require("../models/User");
 
-const isAuthenticated = (req, res, next) => {
-  const token = req.cookies && req.cookies.accessToken;
-
+const isAuthenticated = (req, _res, next) => {
+  const token = req.headers && req.headers?.authorization?.split(" ")[1];
   if (token) {
     const { JWT_SECRET: secret } = process.env;
     jwt.verify(token, secret, (err, payload) => {
@@ -21,7 +20,7 @@ const isAuthenticated = (req, res, next) => {
 
 // check user
 const checkUser = (req, res, next) => {
-  const token = req.cookies && req.cookies.accessToken;
+  const token = req.headers && req.headers?.authorization?.split(" ")[1];
   if (token) {
     const { JWT_SECRET: secret } = process.env;
     jwt.verify(token, secret, (err, payload) => {
@@ -37,7 +36,7 @@ const checkUser = (req, res, next) => {
 };
 
 const checkRole = (roles) => {
-  return (req, res, next) => {
+  return (req, _res, next) => {
     const role = req.user?.role;
     if (roles.includes(role)) {
       next();

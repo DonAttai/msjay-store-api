@@ -48,8 +48,9 @@ const addToCart = async (req, res, next) => {
       if (!req.session.guestCart) {
         req.session.guestCart = {
           userId: req.sessionID,
-          products: [{ productId, quantity: 1 }],
+          products: [{ productId: productId, quantity: 1 }],
         };
+
         return res.status(201).json({ message: "Item added to  cart" });
       }
 
@@ -62,7 +63,7 @@ const addToCart = async (req, res, next) => {
 };
 
 // get all cart
-const getAllCarts = async (req, res, next) => {
+const getAllCarts = async (_req, res, next) => {
   try {
     const cart = await Cart.find({});
     res.status(200).json(cart);
