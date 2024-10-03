@@ -18,7 +18,6 @@ const orderRouter = require("./routes/order-route");
 const paymentRouter = require("./routes/payment-route");
 const addressRouter = require("./routes/address-route");
 const PORT = process.env.PORT ?? 5001;
-const secureSession = require("./utils/secure-session");
 
 const allowedOrigins = [
   "https://msjay-store.onrender.com",
@@ -52,7 +51,7 @@ app.use(
     name: "device",
     store,
     cookie: {
-      secure: secureSession(),
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: "strict",
     },
