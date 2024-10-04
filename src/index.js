@@ -1,10 +1,11 @@
 const express = require("express");
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const createError = require("http-errors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
-const { dbConnection, getMongoUrl } = require("./config/db");
+const { connectDB, getMongoUrl } = require("./config/db");
 const cors = require("cors");
 const app = express();
 
@@ -59,10 +60,9 @@ app.use(
 );
 
 // home route
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Welcome to Ms Jay Store!");
 });
-
 // route middleware
 app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductRouter);
@@ -88,9 +88,12 @@ app.use((err, _req, res, _next) => {
 });
 
 // connect to db
-dbConnection()
-  .then(() => {
-    console.log("connected to db...");
+connectDB()
+  .then((conn) => {
+    console.log(`MongoDB Connected on Port: ${conn.connection.port}`);
     app.listen(PORT, () => console.log(`server running on port: ${PORT}`));
   })
-  .catch((err) => console.error(err.message));
+  .catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });

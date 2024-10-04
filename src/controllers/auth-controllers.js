@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const createError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -8,10 +9,8 @@ const {
   forgetPasswordSchema,
   resetPasswordSchema,
 } = require("../helpers/validation-schema");
-const {
-  sendVerificationEmail,
-  sendForgetPasswordEmail,
-} = require("../utils/send-email");
+
+const generateVerificationCode = require("../utils/generate-verification-code");
 
 // Register
 const register = async (req, res, next) => {
@@ -32,15 +31,21 @@ const register = async (req, res, next) => {
     userData.password = await bcrypt.hash(userData.password, salt);
 
     // create user
-    const user = new User(userData);
-
-    // generate token to verify email
-    // const secret = process.env.JWT_SECRET + user.isVerified;
-    // const token = jwt.sign({ email: user.email }, secret, { expiresIn: "24h" });
+    const verificationCode = generateVerificationCode();
+    const user = new User({
+      ...userData,
+      verificationCode,
+      verificationCodeExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    });
 
     // send verification email
+    // await sendVerificationEmail(user.email, user.verificationCode)
+
+    // save user
     await user.save();
-    res.status(201).json({ message: "Account created successfully" });
+    res
+      .status(201)
+      .json({ success: true, message: "Account created successfully" });
   } catch (error) {
     if (error.isJoi == true) {
       error.status = 422;
@@ -88,7 +93,6 @@ const login = async (req, res, next) => {
     res.status(200).json({
       _id: user._id,
       email: user.email,
-      username: user.username,
       isVerified: user.isVerified,
       role: user.role,
       firstName: user.firstName,
@@ -111,22 +115,26 @@ const forgotPassword = async (req, res, next) => {
     // find user
     const user = await User.findOne({ email });
 
-    if (!user) return next(createError.NotFound());
+    if (!user) return next(createError.NotFound("User Not Found!"));
 
     // generate token to reset  password
-    const secret = process.env.JWT_SECRET + user.password;
-    const token = jwt.sign({ id: user.id }, secret, { expiresIn: "15m" });
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenExpiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
 
-    // send email
-    sendForgetPasswordEmail(user, token)
-      .then(() => {
-        res
-          .status(200)
-          .json({ message: "Reset password link has been sent to your email" });
-      })
-      .catch((error) => {
-        throw error;
-      });
+    user.resetPasswordToken = token;
+    user.resetPasswordToken = tokenExpiresAt;
+
+    // send forgot password email
+    const { CLIENT_URL_LOCAL, CLIENT_URL_REMOTE, NODE_ENV } = process.env;
+    const CLIENT_URL =
+      NODE_ENV === "development" ? CLIENT_URL_LOCAL : CLIENT_URL_REMOTE;
+    // await sendPasswordResetemail(user.email, `${CLIENT_URL}/reset-password/${token}`)
+
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Password reset link sent to your email",
+    });
   } catch (error) {
     next(error);
   }
@@ -134,23 +142,25 @@ const forgotPassword = async (req, res, next) => {
 
 // reset password
 const resetPassword = async (req, res, next) => {
-  const { id, token } = req.params;
+  const { token } = req.params;
   try {
     const { password } = await resetPasswordSchema.validateAsync(req.body);
 
     // find user
-    const user = await User.findById(id);
-    if (!user) return next(createError.NotFound("User does not exists"));
+    const user = await User.findOne({ resetPasswordToken: token });
 
-    const secret = process.env.JWT_SECRET + user.password;
-    jwt.verify(token, secret, (error, payload) => {
-      if (error) return next(createError.Unauthorized("Invalid token"));
-    });
+    if (!user || Date.now() > user?.resetPasswordTokenExpiresAt) {
+      return next(createError(400, "Invalid or expired reset token"));
+    }
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiresAt = undefined;
+
+    // await sendPasswordRestSuccessEmail(user.email);
     await user.save();
-    res.json({ message: "You have successflly changed your password" });
+    res.json({ success: true, message: "Password reset successful" });
   } catch (error) {
     next(error);
   }
@@ -158,19 +168,20 @@ const resetPassword = async (req, res, next) => {
 
 // verify email
 const verifyEmail = async (req, res, next) => {
-  const { id, token } = req.params;
-  const body = req.body;
-  console.log(body);
-
+  const { code } = req.body;
   try {
-    const user = await User.findById(id);
-    if (!user) return next(createError.NotFound("User not found! "));
-    const secret = process.env.JWT_SECRET + user.isVerified;
-    const decode = jwt.verify(token, secret);
-    if (user.email !== decode.email) return next(createError.Forbidden());
+    const user = await User.findOne({ verificationCode: code });
+    if (!user || Date.now() > user?.verificationCodeExpiresAt) {
+      return next(createError(400, "Invalid or expired verification code"));
+    }
 
     // verify user
     user.isVerified = true;
+    user.verificationCode = undefined;
+    user.verificationCodeExpiresAt = undefined;
+
+    // send welcome email
+    // await sendWelcomeEmail(user.email, user.firstName)
 
     // save user
     await user.save();
@@ -178,7 +189,8 @@ const verifyEmail = async (req, res, next) => {
     res.status(200).json({
       _id: user.id,
       email: user.email,
-      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       isVerified: user.isVerified,
       role: user.role,
       accessToken: generateAccessToken(user),

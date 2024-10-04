@@ -11,6 +11,10 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: { type: String, enum: [ROLE.ADMIN, ROLE.USER], default: ROLE.USER },
     isVerified: { type: Boolean, default: true },
+    verificationCode: String,
+    verificationCodeExpiresAt: Date,
+    resetPasswordToken: String,
+    resetPasswordTokenExpiresAt: Date,
   },
   { timestamps: true }
 );

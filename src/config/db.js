@@ -7,8 +7,8 @@ function getMongoUrl() {
   return process.env.MONGO_ATLAS_URI;
 }
 
-const dbConnection = async () => {
+const connectDB = async () => {
   return await mongoose.connect(getMongoUrl());
 };
 
-module.exports = { dbConnection, getMongoUrl };
+module.exports = { connectDB, getMongoUrl };
