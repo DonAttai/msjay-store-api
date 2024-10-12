@@ -4,12 +4,14 @@ const { createOrderSchema } = require("../helpers/validation-schema");
 const { Order, PAYMENTSTATUS } = require("../models/Order");
 const Cart = require("../models/Cart");
 const createError = require("http-errors");
+const { randomUUID } = require("crypto");
 
 const secret = process.env.PAYSTACK_SECRET_KEY;
 const { CLIENT_URL_REMOTE, CLIENT_URL_LOCAL, API_URL } = process.env;
 
 // initialize paystack payment
 const initializePayment = async (req, res, next) => {
+  const guestCart = req.session.guestCart;
   const options = {
     headers: {
       Authorization: `Bearer ${secret}`,
@@ -18,11 +20,12 @@ const initializePayment = async (req, res, next) => {
   };
   try {
     const validatedData = await createOrderSchema.validateAsync(req.body);
+    console.log(validatedData);
 
-    const { email, amount, cartItems } = validatedData;
+    const { customer, amount, cartItems, addressInfo } = validatedData;
 
     const transactionDetails = {
-      email,
+      email: customer?.email,
       amount: amount * 100,
       callback_url: `${API_URL}/api/paystack/callback`,
     };
@@ -32,8 +35,17 @@ const initializePayment = async (req, res, next) => {
     const { authorization_url, reference: transactionId } = response.data.data;
     const totalAmount = amount.toFixed(2);
 
+    let customerId;
+    if (req.user) {
+      customerId = req.user.id;
+    } else {
+      customerId = randomUUID();
+    }
+
     const newOrder = new Order({
-      userId: req.user?.id,
+      customerId,
+      addressInfo,
+      customer,
       transactionId,
       cartItems,
       totalAmount,
@@ -42,9 +54,15 @@ const initializePayment = async (req, res, next) => {
     const savedOrder = await newOrder.save();
 
     if (savedOrder) {
-      const cart = await Cart.findOne({ userId: req.user.id });
-      if (!cart) return next(createError.NotFound("Cart not found"));
-      await cart.deleteOne({ _id: cart._id });
+      // delete guest cart if it exist
+      if (guestCart) {
+        req.session.guestCart = null;
+      } else {
+        // delete customer cart
+        const cart = await Cart.findOne({ userId: req.user.id });
+        if (!cart) return next(createError.NotFound("Cart not found"));
+        await cart.deleteOne({ _id: cart._id });
+      }
     }
     res.status(200).json({ paymentUrl: authorization_url });
   } catch (error) {
@@ -62,6 +80,7 @@ const handleCallback = async (req, res, next) => {
       if (order) {
         order.paymentStatus = PAYMENTSTATUS.PAID;
         await order.save();
+
         return res.redirect(
           `${CLIENT_URL_REMOTE}/order/success?reference=${reference}`
         );

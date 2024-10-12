@@ -4,11 +4,11 @@ const {
   paystackWebHook,
   handleCallback,
 } = require("../controllers/payment-controller");
-const { isAuthenticated } = require("../middleware/auth-middleware");
+const { checkUser } = require("../middleware/auth-middleware");
 
 const router = express.Router();
 
-router.post("/initialize", isAuthenticated, initializePayment);
+router.post("/initialize", checkUser, initializePayment);
 router.get("/callback", handleCallback);
 router.post("/webhook", paystackWebHook);
 

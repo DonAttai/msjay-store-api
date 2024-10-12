@@ -13,7 +13,7 @@ const PAYMENTSTATUS = {
 
 const OrderSchema = new mongoose.Schema(
   {
-    userId: {
+    customerId: {
       type: String,
       required: true,
     },
@@ -29,6 +29,17 @@ const OrderSchema = new mongoose.Schema(
         quantity: { type: Number, required: true },
       },
     ],
+    customer: {
+      email: { type: String, required: true },
+      fullName: { type: String, required: true },
+    },
+    addressInfo: {
+      address: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      phone: { type: String, required: true },
+    },
 
     totalAmount: { type: String, required: true },
     orderStatus: {

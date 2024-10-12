@@ -10,7 +10,7 @@ const { isAuthenticated, checkRole } = require("../middleware/auth-middleware");
 
 // get all orders route
 router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllOrders);
-router.get("/:transactionId", isAuthenticated, getOrderByTransactionId);
+router.get("/:transactionId", getOrderByTransactionId);
 router.patch("/:transactionId", isAuthenticated, updateOrderByTransactionId);
 
 module.exports = router;

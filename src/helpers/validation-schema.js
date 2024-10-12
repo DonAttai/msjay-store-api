@@ -27,6 +27,15 @@ const rolesSchema = Joi.object({
     .items(Joi.string().valid("user", "admin").required()),
 });
 
+// create address schema
+const addressSchema = Joi.object({
+  address: Joi.string().required(),
+  street: Joi.string().required(),
+  city: Joi.string().required(),
+  state: Joi.string().required(),
+  phone: Joi.string().required(),
+});
+
 // product schema
 const createProductSchema = Joi.object({
   title: Joi.string().required(),
@@ -61,7 +70,11 @@ const updateCartSchema = Joi.object({
 
 // create order schema
 const createOrderSchema = Joi.object({
-  email: Joi.string().required(),
+  customer: Joi.object({
+    email: Joi.string().required(),
+    fullName: Joi.string().required(),
+  }),
+  addressInfo: addressSchema,
   amount: Joi.number().required(),
   cartItems: Joi.array().items(createCartSchema),
 });
@@ -76,15 +89,6 @@ const resetPasswordSchema = Joi.object({
 });
 const forgetPasswordSchema = Joi.object({
   email: Joi.string().min(8).required(),
-});
-
-// create address schema
-const addressSchema = Joi.object({
-  address: Joi.string().required(),
-  street: Joi.string().required(),
-  city: Joi.string().required(),
-  state: Joi.string().required(),
-  phone: Joi.string().required(),
 });
 
 module.exports = {

@@ -28,15 +28,15 @@ const getUserAddress = async (req, res, next) => {
 
 // update user address
 const updateUserAddress = async (req, res, next) => {
-  const addressId = req.params.id;
+  const userId = req.params.id;
 
   try {
     const addressData = await addressSchema.validateAsync(req.body);
-    const address = await Address.findById({ _id: addressId });
+    const address = await Address.findOne({ userId });
     if (!address) {
       return next(createError.NotFound("address not found"));
     }
-    await Address.findByIdAndUpdate(addressId, addressData, { new: true });
+    await Address.updateOne({ userId }, { $set: { ...addressData } });
     res.status(200).json({ message: "address update successful" });
   } catch (error) {
     next(error);
