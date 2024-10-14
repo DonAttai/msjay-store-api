@@ -46,6 +46,7 @@ store.on("error", (error) => {
 
 app.set("trust proxy", true);
 
+// express session
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
