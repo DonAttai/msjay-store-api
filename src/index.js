@@ -21,8 +21,8 @@ const addressRouter = require("./routes/address-route");
 const PORT = process.env.PORT ?? 5001;
 
 const allowedOrigins = [
-  "https://msjay-store.onrender.com",
-  "http://localhost:3200",
+  process.env.CLIENT_URL_REMOTE,
+  process.env.CLIENT_URL_LOCAL,
 ];
 const corsOptions = {
   origin: allowedOrigins,
@@ -44,6 +44,8 @@ store.on("error", (error) => {
   console.error(error);
 });
 
+app.set("trust proxy", true);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -54,7 +56,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: "strict",
+      sameSite: "lax",
     },
   })
 );
