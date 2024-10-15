@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const createError = require("http-errors");
+const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
@@ -29,6 +30,7 @@ const corsOptions = {
   credentials: true,
 };
 
+app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use("/img", express.static("img"));
 app.use(express.urlencoded({ limit: "5mb", extended: false }));
@@ -57,7 +59,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: "none",
+      sameSite: process.env.NODE_ENV === "development" ? "strict" : "none",
     },
   })
 );

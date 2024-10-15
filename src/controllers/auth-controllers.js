@@ -89,6 +89,16 @@ const login = async (req, res, next) => {
     }
 
     const user = req.user;
+    // create access token
+    const accessToken = generateAccessToken(user);
+
+    // send cookie with token to client
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: process.env.NODE_ENV === "development" ? "strict" : "none",
+    });
 
     res.status(200).json({
       _id: user._id,
@@ -97,12 +107,27 @@ const login = async (req, res, next) => {
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
-      accessToken: generateAccessToken(user),
     });
   } catch (error) {
     if (error.isJoi === true) {
       error.status = 422;
     }
+    next(error);
+  }
+};
+
+const logOut = async (req, res, next) => {
+  try {
+    const token = req.cookies && req.cookies["accessToken"];
+    if (token) {
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+    }
+    res.status(200).send({ message: "Logged out Successfully!" });
+  } catch (error) {
     next(error);
   }
 };
@@ -202,14 +227,19 @@ const verifyEmail = async (req, res, next) => {
 
 // generate access token
 const generateAccessToken = (user) => {
-  return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: "24h",
-  });
+  return jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: "24h",
+    }
+  );
 };
 
 module.exports = {
   register,
   login,
+  logOut,
   forgotPassword,
   resetPassword,
   verifyEmail,
