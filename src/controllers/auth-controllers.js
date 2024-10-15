@@ -123,7 +123,7 @@ const logOut = async (req, res, next) => {
       res.clearCookie("accessToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "development" ? "strict" : "none",
       });
     }
     res.status(200).send({ message: "Logged out Successfully!" });
