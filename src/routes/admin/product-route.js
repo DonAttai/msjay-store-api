@@ -12,11 +12,21 @@ const { ROLE } = require("../../models/User");
 
 const express = require("express");
 
-const router = express.Router();
+const adminRoutes = express.Router();
 
-router.post("/", isAuthenticated, checkRole([ROLE.ADMIN]), addProduct);
-router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllProducts);
-router.patch("/:id", isAuthenticated, checkRole([ROLE.ADMIN]), updateProduct);
-router.delete("/:id", isAuthenticated, checkRole([ROLE.ADMIN]), deleteProduct);
+adminRoutes.post("/", isAuthenticated, checkRole([ROLE.ADMIN]), addProduct);
+adminRoutes.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllProducts);
+adminRoutes.patch(
+  "/:id",
+  isAuthenticated,
+  checkRole([ROLE.ADMIN]),
+  updateProduct
+);
+adminRoutes.delete(
+  "/:id",
+  isAuthenticated,
+  checkRole([ROLE.ADMIN]),
+  deleteProduct
+);
 
-module.exports = router;
+module.exports = adminRoutes;

@@ -26,7 +26,7 @@ const getUserById = async (req, res, next) => {
 };
 
 //  Get user statistics
-const getUsersStats = async (req, res, next) => {
+const getUsersStats = async (_req, res, next) => {
   const date = new Date();
   const lastYear = new Date(date.setFullYear(date.getFullYear() - 1));
 

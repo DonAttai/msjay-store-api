@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const cartRoutes = express.Router();
 
 const {
   addToCart,
@@ -19,24 +19,24 @@ const {
 const { ROLE } = require("../models/User");
 
 // add to cart -> Guest and Authenticated user
-router.post("/", checkUser, addToCart);
+cartRoutes.post("/", checkUser, addToCart);
 
 // get all carts route -> Admin
-router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllCarts);
+cartRoutes.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllCarts);
 
 // get  cart  -> Guest and Authenticated user
-router.get("/cart", checkUser, getCart);
+cartRoutes.get("/cart", checkUser, getCart);
 
 // remove item from cart -> Guest and Authenticated user
-router.post("/cart", checkUser, removeItemFromCart);
+cartRoutes.post("/cart", checkUser, removeItemFromCart);
 
 // decrease cart item quantity  -> Guest and Authenticated user
-router.post("/cart/:productId", checkUser, decreaseCartItemQuantity);
+cartRoutes.post("/cart/:productId", checkUser, decreaseCartItemQuantity);
 
 // update cart  -> Authenticated user
-router.patch("/:id", isAuthenticated, updateCart);
+cartRoutes.patch("/:id", isAuthenticated, updateCart);
 
 // delete cart -> Authenticated user
-router.delete("/:id", isAuthenticated, deleteCart);
+cartRoutes.delete("/:id", isAuthenticated, deleteCart);
 
-module.exports = router;
+module.exports = cartRoutes;

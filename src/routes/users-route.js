@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const userRoutes = express.Router();
 const {
   updateUser,
   getAllUsers,
@@ -17,18 +17,23 @@ const {
 const { ROLE } = require("../models/User");
 
 // get all users
-router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllUsers);
+userRoutes.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllUsers);
 
 // get users statistics
-router.get("/stats", isAuthenticated, checkRole([ROLE.ADMIN]), getUsersStats);
+userRoutes.get(
+  "/stats",
+  isAuthenticated,
+  checkRole([ROLE.ADMIN]),
+  getUsersStats
+);
 
 // get a single user
-router.get("/:id", isAuthenticated, getCurrentUserOrAdmin(), getUserById);
+userRoutes.get("/:id", isAuthenticated, getCurrentUserOrAdmin(), getUserById);
 
 // update user
-router.patch("/:id", isAuthenticated, updateUser);
+userRoutes.patch("/:id", isAuthenticated, updateUser);
 
 // delete user
-router.delete("/:id", isAuthenticated, deleteUser);
+userRoutes.delete("/:id", isAuthenticated, deleteUser);
 
-module.exports = router;
+module.exports = userRoutes;

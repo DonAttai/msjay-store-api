@@ -5,10 +5,10 @@ const {
   getUserAddress,
   updateUserAddress,
 } = require("../controllers/address-controller");
-const router = express.Router();
+const addressRoutes = express.Router();
 
-router.post("/", isAuthenticated, addAddress);
-router.get("/:userId", isAuthenticated, getUserAddress);
-router.patch("/:id", isAuthenticated, updateUserAddress);
+addressRoutes.post("/", isAuthenticated, addAddress);
+addressRoutes.get("/:userId", isAuthenticated, getUserAddress);
+addressRoutes.patch("/:id", isAuthenticated, updateUserAddress);
 
-module.exports = router;
+module.exports = addressRoutes;

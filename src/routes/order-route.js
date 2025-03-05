@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const orderRoutes = express.Router();
 const {
   getAllOrders,
   getOrderByTransactionId,
@@ -9,8 +9,12 @@ const { ROLE } = require("../models/User");
 const { isAuthenticated, checkRole } = require("../middleware/auth-middleware");
 
 // get all orders route
-router.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllOrders);
-router.get("/:transactionId", getOrderByTransactionId);
-router.patch("/:transactionId", isAuthenticated, updateOrderByTransactionId);
+orderRoutes.get("/", isAuthenticated, checkRole([ROLE.ADMIN]), getAllOrders);
+orderRoutes.get("/:transactionId", getOrderByTransactionId);
+orderRoutes.patch(
+  "/:transactionId",
+  isAuthenticated,
+  updateOrderByTransactionId
+);
 
-module.exports = router;
+module.exports = orderRoutes;

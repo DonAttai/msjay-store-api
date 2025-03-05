@@ -6,10 +6,10 @@ const {
 } = require("../controllers/payment-controller");
 const { checkUser } = require("../middleware/auth-middleware");
 
-const router = express.Router();
+const paymentRoutes = express.Router();
 
-router.post("/initialize", checkUser, initializePayment);
-router.get("/callback", handleCallback);
-router.post("/webhook", paystackWebHook);
+paymentRoutes.post("/initialize", checkUser, initializePayment);
+paymentRoutes.get("/callback", handleCallback);
+paymentRoutes.post("/webhook", paystackWebHook);
 
-module.exports = router;
+module.exports = paymentRoutes;
